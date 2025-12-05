@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>東京冬旅 2026 | 深度導覽版</title>
+    <title>東京冬旅 2026| | 深度導覽版</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -91,7 +91,7 @@
 <body class="text-muji-text select-none">
 
     <header class="fixed top-0 w-full bg-muji-card shadow-sm z-40 px-4 py-3 flex justify-between items-center transition-all duration-300" id="main-header">
-        <h1 class="text-lg font-bold tracking-widest text-muji-accent">TOKYO 2026</h1>
+        <h1 class="text-lg font-bold tracking-widest text-muji-accent">TOKYO 2026|</h1>
         <div class="text-xs text-muji-sub">1/16 - 1/23</div>
     </header>
 
@@ -233,6 +233,47 @@
 
         <div id="view-info" class="view-section hidden space-y-4">
             
+            <div class="bg-muji-card rounded-lg p-4 shadow-sm">
+                <h3 class="font-bold mb-3 text-muji-accent"><i class="fa-solid fa-plane-departure mr-2"></i>航班資訊</h3>
+                <div class="space-y-3">
+                    <div class="border-l-4 border-stone-300 pl-3">
+                        <div class="text-xs text-muji-sub">去程 (1/16)</div>
+                        <div class="font-bold text-lg text-stone-800">JX802</div>
+                        <div class="flex justify-between text-sm mt-1">
+                            <span>10:10 TPE</span>
+                            <i class="fa-solid fa-arrow-right text-stone-400"></i>
+                            <span>14:20 NRT</span>
+                        </div>
+                    </div>
+                    <div class="border-l-4 border-stone-300 pl-3">
+                        <div class="text-xs text-muji-sub">回程 (1/23)</div>
+                        <div class="font-bold text-lg text-stone-800">JX803</div>
+                        <div class="flex justify-between text-sm mt-1">
+                            <span>15:40 NRT</span>
+                            <i class="fa-solid fa-arrow-right text-stone-400"></i>
+                            <span>18:45 TPE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-muji-card rounded-lg p-4 shadow-sm">
+                <h3 class="font-bold mb-3 text-muji-accent"><i class="fa-solid fa-hotel mr-2"></i>住宿資訊</h3>
+                <div class="font-bold text-lg text-stone-800 mb-1">Provence Hotel</div>
+                <div class="text-xs text-stone-500 mb-3"><i class="fa-solid fa-calendar-check mr-1"></i>1/16 - 1/23</div>
+                
+                <div class="text-sm text-stone-600 space-y-2 mb-3">
+                    <p><i class="fa-solid fa-location-dot w-5 text-center"></i>東京都墨田區江東橋4-22-5</p>
+                    <div class="flex gap-4">
+                        <p><i class="fa-solid fa-clock w-5 text-center"></i>IN: 15:00</p>
+                        <p><i class="fa-solid fa-clock w-5 text-center"></i>OUT: 10:00</p>
+                    </div>
+                </div>
+                <a href="https://www.google.com/maps/search/?api=1&query=Provence+Hotel+Tokyo" target="_blank" class="block w-full text-center bg-stone-100 text-stone-600 text-xs py-2 rounded hover:bg-stone-200 transition">
+                    開啟 Google Maps
+                </a>
+            </div>
+
             <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-center gap-4">
                 <i class="fa-solid fa-cloud-sun text-2xl text-blue-400"></i>
                 <div>
@@ -310,8 +351,8 @@
                 title: "抵達東京 & 人形町晚餐",
                 events: [
                     { time: "06:00", title: "苗栗家出發", location: "苗栗", note: "機場接送", important: true },
-                    { time: "07:00", title: "抵達桃園機場 T1", location: "T1", note: "機場接送 (8月訂)" },
-                    { time: "10:10", title: "登機", location: "登機口", note: "飛往成田" },
+                    { time: "07:00", title: "抵達桃園機場 T1", location: "T1", note: "機場接送" },
+                    { time: "10:10", title: "登機 (JX802)", location: "登機口", note: "飛往成田" },
                     { time: "14:20", title: "抵達成田機場", location: "成田機場", note: "拿行李" },
                     { time: "16:00", title: "成田機場車站", location: "機場車站", note: "左邊京成線(Access特快)、先到先贏、儲值西瓜卡" },
                     { time: "16:06", title: "SKYACCESS 發車", location: "往押上", note: "約52分鐘 (下一班 16:46)" },
@@ -407,7 +448,9 @@
                 events: [
                     { time: "10:00", title: "退房", location: "Provence Hotel", note: "前往錦糸町站" },
                     { time: "11:00", title: "錦糸町車站", location: "錦糸町", note: "前往機場" },
-                    { time: "12:40", title: "抵達成田機場", location: "成田機場", note: "Check-in" }
+                    { time: "12:40", title: "抵達成田機場", location: "成田機場", note: "Check-in" },
+                    { time: "15:40", title: "起飛 (JX803)", location: "成田機場", note: "飛往台北" },
+                    { time: "18:45", title: "抵達桃園", location: "TPE", note: "平安回家" }
                 ]
             }
         ];
