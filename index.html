@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>東京冬旅 2026| | 深度導覽版</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        muji: {
+                            bg: '#F7F7F7',      // 米白背景
+                            card: '#FFFFFF',    // 純白卡片
+                            text: '#333333',    // 深灰文字
+                            sub: '#8c8c8c',     // 淺灰輔助字
+                            accent: '#7D7065',  // 無印棕
+                            highlight: '#A84545', // 重點標示紅
+                            blue: '#4A6C96'     // 導覽藍
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F7F7F7;
+            font-family: 'Noto Sans TC', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+        /* Hide Scrollbar but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        input[type="checkbox"]:checked + span {
+            text-decoration: line-through;
+            color: #8c8c8c;
+        }
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #7D7065;
+            width: 20px;
+            height: 20px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .photo-spot-tag {
+            background-color: #EFEFEF;
+            color: #555;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+        /* Make events clickable */
+        .event-card {
+            transition: all 0.2s;
+        }
+        .event-card:active {
+            transform: scale(0.98);
+            background-color: #f0f0f0;
+        }
+        /* Custom scroll for nav if items exceed width */
+        .nav-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
+</head>
+<body class="text-muji-text select-none">
+
+    <header class="fixed top-0 w-full bg-muji-card shadow-sm z-40 px-4 py-3 flex justify-between items-center transition-all duration-300" id="main-header">
+        <h1 class="text-lg font-bold tracking-widest text-muji-accent">TOKYO 2026|</h1>
+        <div class="text-xs text-muji-sub">1/16 - 1/23</div>
+    </header>
+
+    <main class="mt-16 px-4 fade-in min-h-screen">
+        
+        <div id="view-plan" class="view-section relative">
+            <div class="flex overflow-x-auto no-scrollbar mb-4 gap-2 pb-2 sticky top-14 z-30 bg-muji-bg pt-2" id="day-tabs">
+                </div>
+            
+            <div id="itinerary-content" class="space-y-4 pb-20">
+                </div>
+
+            <button onclick="openAddEventModal()" class="fixed bottom-20 right-4 w-12 h-12 bg-stone-800 text-white rounded-full shadow-lg flex items-center justify-center text-xl z-30 hover:bg-stone-700 active:scale-90 transition">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+
+            <div id="event-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+                <div class="bg-white w-full max-w-sm rounded-lg p-5 shadow-xl fade-in">
+                    <h3 id="modal-title" class="text-lg font-bold text-muji-accent mb-4">新增行程</h3>
+                    
+                    <input type="hidden" id="edit-day-idx" value="">
+                    <input type="hidden" id="edit-event-idx" value="">
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">日期</label>
+                            <select id="new-evt-day" class="w-full bg-stone-50 border border-stone-200 rounded p-2 text-sm outline-none focus:border-muji-accent">
+                                </select>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <div class="w-1/3">
+                                <label class="text-xs text-stone-500 block mb-1">時間</label>
+                                <input type="time" id="new-evt-time" class="w-full bg-stone-50 border border-stone-200 rounded p-2 text-sm outline-none focus:border-muji-accent">
+                            </div>
+                            <div class="w-2/3">
+                                <label class="text-xs text-stone-500 block mb-1">標題</label>
+                                <input type="text" id="new-evt-title" placeholder="例: 逛街" class="w-full bg-stone-50 border border-stone-200 rounded p-2 text-sm outline-none focus:border-muji-accent">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">地點</label>
+                            <input type="text" id="new-evt-loc" placeholder="例: 新宿" class="w-full bg-stone-50 border border-stone-200 rounded p-2 text-sm outline-none focus:border-muji-accent">
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-stone-500 block mb-1">備註 (選填)</label>
+                            <input type="text" id="new-evt-note" placeholder="例: 必買藥妝" class="w-full bg-stone-50 border border-stone-200 rounded p-2 text-sm outline-none focus:border-muji-accent">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 mt-6">
+                        <button id="btn-delete-event" onclick="deleteCurrentEvent()" class="hidden py-2 px-4 rounded bg-red-50 text-red-500 border border-red-200 text-sm hover:bg-red-100"><i class="fa-solid fa-trash-can"></i></button>
+                        <div class="flex-1 flex gap-3">
+                            <button onclick="document.getElementById('event-modal').classList.add('hidden')" class="flex-1 py-2 rounded border border-stone-300 text-stone-500 text-sm">取消</button>
+                            <button onclick="handleSaveEvent()" class="flex-1 py-2 rounded bg-muji-accent text-white text-sm shadow">儲存</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-guide" class="view-section hidden">
+            <h2 class="text-xl font-bold mb-4 border-l-4 border-muji-accent pl-3 flex justify-between items-center">
+                深度導覽
+                <span class="text-xs font-normal text-muji-sub bg-white px-2 py-1 rounded border border-stone-200">
+                    <i class="fa-solid fa-camera mr-1"></i>含拍照點
+                </span>
+            </h2>
+            
+            <div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar">
+                <button onclick="filterGuide('all')" class="guide-filter active px-3 py-1 rounded-full text-xs bg-muji-accent text-white transition">全部</button>
+                <button onclick="filterGuide('spot')" class="guide-filter px-3 py-1 rounded-full text-xs bg-white text-stone-500 border border-stone-200 transition">景點</button>
+                <button onclick="filterGuide('food')" class="guide-filter px-3 py-1 rounded-full text-xs bg-white text-stone-500 border border-stone-200 transition">美食</button>
+            </div>
+
+            <div id="guide-list" class="space-y-6 pb-20">
+                </div>
+        </div>
+
+        <div id="view-wallet" class="view-section hidden">
+            
+            <div class="bg-muji-card rounded-lg p-4 shadow-sm mb-6 border border-stone-200">
+                <h3 class="text-sm font-bold text-muji-sub mb-2">匯率計算機 (算式支援)</h3>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xs text-muji-sub">匯率</span>
+                    <input type="number" id="rate-input" value="0.215" class="w-16 bg-stone-100 rounded px-2 py-1 text-sm text-center focus:outline-none">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <input type="text" id="calc-input" placeholder="輸入日幣 (如 500+120*2)" class="w-full text-lg bg-stone-50 border-b border-stone-300 p-2 focus:outline-none font-mono">
+                    <div class="flex justify-between items-end">
+                        <div class="text-3xl font-bold text-muji-accent">NT$ <span id="calc-result">0</span></div>
+                        <button onclick="calculateRate()" class="bg-muji-accent text-white px-4 py-2 rounded shadow text-sm">計算</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-muji-card rounded-lg p-4 shadow-sm mb-6">
+                <h3 class="text-sm font-bold text-muji-sub mb-3">新增記帳</h3>
+                <div class="grid grid-cols-3 gap-2 mb-3">
+                    <input type="text" id="expense-item" placeholder="品項" class="col-span-2 bg-stone-50 rounded p-2 text-sm focus:outline-none">
+                    <input type="number" id="expense-amount" placeholder="¥金額" class="col-span-1 bg-stone-50 rounded p-2 text-sm focus:outline-none">
+                </div>
+                <div class="flex justify-between items-center">
+                    <label class="flex items-center gap-2 bg-stone-100 px-3 py-2 rounded text-xs text-muji-sub cursor-pointer active:scale-95 transition">
+                        <i class="fa-solid fa-camera"></i>
+                        <span id="photo-label">相片(選填)</span>
+                        <input type="file" id="expense-photo" accept="image/*" class="hidden">
+                    </label>
+                    <button onclick="addExpense()" class="bg-stone-800 text-white px-6 py-2 rounded text-sm shadow active:scale-95 transition">儲存</button>
+                </div>
+            </div>
+
+            <h3 class="text-sm font-bold text-muji-sub mb-2 flex justify-between">
+                <span>記帳列表</span>
+                <span class="text-xs font-normal">總計: <span id="total-jpy">0</span> JPY / <span id="total-twd">0</span> TWD</span>
+            </h3>
+            <div id="expense-list" class="space-y-3 pb-20">
+                </div>
+            <button onclick="clearExpenses()" class="w-full text-center text-xs text-red-300 mt-8 mb-4">清除所有記帳資料</button>
+        </div>
+
+        <div id="view-shopping" class="view-section hidden">
+            <div class="bg-muji-card rounded-lg p-4 shadow-sm mb-6 border-l-4 border-muji-accent">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-muji-accent"><i class="fa-solid fa-bag-shopping mr-2"></i>購物清單</h3>
+                    <div class="flex gap-2">
+                         <input type="text" id="new-shop-item" placeholder="新增商品..." class="bg-stone-50 border-b text-sm p-1 w-32 focus:outline-none focus:border-muji-accent transition">
+                         <button onclick="addShopItem()" class="text-muji-accent w-8 h-8 rounded-full hover:bg-stone-100"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+                <div id="shopping-list-container" class="space-y-2">
+                    </div>
+            </div>
+
+            <div class="bg-muji-card rounded-lg p-4 shadow-sm mb-6">
+                <h3 class="text-lg font-bold text-muji-accent mb-2">購物備忘錄</h3>
+                <textarea id="shopping-memo-area" class="w-full h-40 bg-stone-50 rounded p-3 text-sm focus:outline-none resize-none" placeholder="輸入型號、價格或網址..."></textarea>
+                <div id="shopping-memo-links" class="mt-3 flex flex-wrap gap-2">
+                    </div>
+            </div>
+
+            <div class="text-center text-xs text-stone-400 mt-10">
+                Tip: 點擊項目可標記完成，點擊垃圾桶刪除
+            </div>
+        </div>
+
+        <div id="view-packing" class="view-section hidden">
+            <div class="bg-muji-card rounded-lg p-4 shadow-sm mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-stone-600"><i class="fa-solid fa-suitcase-rolling mr-2"></i>行前清單</h3>
+                    <div class="flex gap-2">
+                         <input type="text" id="new-todo" placeholder="新增項目..." class="bg-stone-50 border-b text-sm p-1 w-32 focus:outline-none">
+                         <button onclick="addTodo()" class="text-stone-400 hover:text-muji-accent"><i class="fa-solid fa-plus-circle"></i></button>
+                    </div>
+                </div>
+                <div id="checklist-container" class="space-y-2">
+                    </div>
+            </div>
+
+            <div class="bg-muji-card rounded-lg p-4 shadow-sm">
+                <h3 class="text-lg font-bold text-stone-600 mb-2">備忘錄</h3>
+                <textarea id="memo-area" class="w-full h-40 bg-stone-50 rounded p-3 text-sm focus:outline-none resize-none" placeholder="輸入文字或網址..."></textarea>
+                <div id="memo-links" class="mt-3 flex flex-wrap gap-2">
+                    </div>
+            </div>
+        </div>
+
+        <div id="view-info" class="view-section hidden space-y-4">
+            
+            <div class="bg-muji-card rounded-lg p-4 shadow-sm">
+                <h3 class="font-bold mb-3 text-muji-accent"><i class="fa-solid fa-plane-departure mr-2"></i>航班資訊</h3>
+                <div class="space-y-3">
+                    <div class="border-l-4 border-stone-300 pl-3">
+                        <div class="text-xs text-muji-sub">去程 (1/16)</div>
+                        <div class="font-bold text-lg text-stone-800">JX802</div>
+                        <div class="flex justify-between text-sm mt-1">
+                            <span>10:10 TPE</span>
+                            <i class="fa-solid fa-arrow-right text-stone-400"></i>
+                            <span>14:20 NRT</span>
+                        </div>
+                    </div>
+                    <div class="border-l-4 border-stone-300 pl-3">
+                        <div class="text-xs text-muji-sub">回程 (1/23)</div>
+                        <div class="font-bold text-lg text-stone-800">JX803</div>
+                        <div class="flex justify-between text-sm mt-1">
+                            <span>15:40 NRT</span>
+                            <i class="fa-solid fa-arrow-right text-stone-400"></i>
+                            <span>18:45 TPE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-muji-card rounded-lg p-4 shadow-sm">
+                <h3 class="font-bold mb-3 text-muji-accent"><i class="fa-solid fa-hotel mr-2"></i>住宿資訊</h3>
+                <div class="font-bold text-lg text-stone-800 mb-1">Provence Hotel</div>
+                <div class="text-xs text-stone-500 mb-3"><i class="fa-solid fa-calendar-check mr-1"></i>1/16 - 1/23</div>
+                
+                <div class="text-sm text-stone-600 space-y-2 mb-3">
+                    <p><i class="fa-solid fa-location-dot w-5 text-center"></i>東京都墨田區江東橋4-22-5</p>
+                    <div class="flex gap-4">
+                        <p><i class="fa-solid fa-clock w-5 text-center"></i>IN: 15:00</p>
+                        <p><i class="fa-solid fa-clock w-5 text-center"></i>OUT: 10:00</p>
+                    </div>
+                </div>
+                <a href="https://www.google.com/maps/search/?api=1&query=Provence+Hotel+Tokyo" target="_blank" class="block w-full text-center bg-stone-100 text-stone-600 text-xs py-2 rounded hover:bg-stone-200 transition">
+                    開啟 Google Maps
+                </a>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-center gap-4">
+                <i class="fa-solid fa-cloud-sun text-2xl text-blue-400"></i>
+                <div>
+                    <div class="font-bold text-blue-800">天氣預報</div>
+                    <a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" class="text-xs text-blue-500 underline">點擊前往日本氣象廳</a>
+                </div>
+            </div>
+
+            <div class="bg-red-50 border border-red-100 rounded-lg p-4">
+                <div class="font-bold text-red-800 mb-2"><i class="fa-solid fa-triangle-exclamation mr-2"></i>緊急聯絡</div>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div class="bg-white p-2 rounded text-center shadow-sm">
+                        <div class="text-xs text-gray-500">警察局</div>
+                        <div class="text-xl font-bold text-red-600">110</div>
+                    </div>
+                    <div class="bg-white p-2 rounded text-center shadow-sm">
+                        <div class="text-xs text-gray-500">救護車/火警</div>
+                        <div class="text-xl font-bold text-red-600">119</div>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-red-700 bg-white p-2 rounded">
+                    <strong>台灣駐日代表處：</strong><br>
+                    080-1009-7179 (緊急聯絡電話)
+                </div>
+            </div>
+
+            <div class="bg-muji-card rounded-lg p-4 shadow-sm">
+                <h3 class="font-bold mb-2 text-muji-accent">旅遊小貼士</h3>
+                <ul class="list-disc list-inside text-sm space-y-2 text-gray-600">
+                    <li>日本電壓 100V，插座為雙平腳（與台灣相同）。</li>
+                    <li>搭乘手扶梯：東京地區習慣靠左站立。</li>
+                    <li>購物滿 5000 日圓（未稅）可直接退稅，護照必須隨身攜帶。</li>
+                    <li>室內大多數場所禁止吸菸，請尋找指定吸菸區。</li>
+                    <li>電車內請將手機設為靜音，避免通話。</li>
+                </ul>
+            </div>
+        </div>
+
+    </main>
+
+    <nav class="fixed bottom-0 w-full bg-white border-t border-stone-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50">
+        <div class="flex items-center h-16 nav-scroll">
+            <button onclick="switchTab('plan')" class="nav-btn active flex flex-col items-center gap-1 w-full h-full justify-center min-w-[64px] text-muji-sub hover:text-muji-accent transition">
+                <i class="fa-solid fa-calendar-days text-xl"></i>
+                <span class="text-[10px]">行程</span>
+            </button>
+            <button onclick="switchTab('guide')" class="nav-btn flex flex-col items-center gap-1 w-full h-full justify-center min-w-[64px] text-muji-sub hover:text-muji-accent transition">
+                <i class="fa-solid fa-book-open text-xl"></i>
+                <span class="text-[10px]">導覽</span>
+            </button>
+            <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center gap-1 w-full h-full justify-center min-w-[64px] text-muji-sub hover:text-muji-accent transition">
+                <i class="fa-solid fa-wallet text-xl"></i>
+                <span class="text-[10px]">錢包</span>
+            </button>
+            <button onclick="switchTab('shopping')" class="nav-btn flex flex-col items-center gap-1 w-full h-full justify-center min-w-[64px] text-muji-sub hover:text-muji-accent transition">
+                <i class="fa-solid fa-bag-shopping text-xl"></i>
+                <span class="text-[10px]">購物</span>
+            </button>
+            <button onclick="switchTab('packing')" class="nav-btn flex flex-col items-center gap-1 w-full h-full justify-center min-w-[64px] text-muji-sub hover:text-muji-accent transition">
+                <i class="fa-solid fa-suitcase-rolling text-xl"></i>
+                <span class="text-[10px]">行前</span>
+            </button>
+            <button onclick="switchTab('info')" class="nav-btn flex flex-col items-center gap-1 w-full h-full justify-center min-w-[64px] text-muji-sub hover:text-muji-accent transition">
+                <i class="fa-solid fa-circle-info text-xl"></i>
+                <span class="text-[10px]">資訊</span>
+            </button>
+        </div>
+    </nav>
+
+    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-90 hidden z-[60] flex items-center justify-center p-4" onclick="this.classList.add('hidden')">
+        <img id="modal-img" src="" class="max-w-full max-h-full rounded shadow-lg">
+    </div>
+
+    <script>
+        // ================= DATA =================
+        const defaultItineraryData = [
+            {
+                date: "1/16 (四)",
+                title: "抵達東京 & 人形町晚餐",
+                events: [
+                    { time: "06:00", title: "苗栗家出發", location: "苗栗", note: "機場接送", important: true },
+                    { time: "07:00", title: "抵達桃園機場 T1", location: "T1", note: "機場接送" },
+                    { time: "10:10", title: "登機 (JX802)", location: "登機口", note: "飛往成田" },
+                    { time: "14:20", title: "抵達成田機場", location: "成田機場", note: "拿行李" },
+                    { time: "16:00", title: "成田機場車站", location: "機場車站", note: "左邊京成線(Access特快)、先到先贏、儲值西瓜卡" },
+                    { time: "16:06", title: "SKYACCESS 發車", location: "往押上", note: "約52分鐘 (下一班 16:46)" },
+                    { time: "16:59", title: "抵達押上", location: "押上站", note: "轉乘半藏門線" },
+                    { time: "17:06", title: "抵達錦糸町", location: "錦糸町站", note: "前往飯店" },
+                    { time: "17:15", title: "Check-in", location: "Provence Hotel", link: "https://www.google.com/maps/search/?api=1&query=Provence+Hotel+Sumida", note: "走路或計程車約8分鐘" },
+                    { time: "18:30", title: "前往水天宮前", location: "水天宮前站", note: "半藏門線 (約22分鐘)" },
+                    { time: "20:00", title: "晚餐：人形町今半", location: "日本橋高島屋S.C.店", link: "https://www.google.com/maps/search/?api=1&query=人形町今半+日本橋高島屋", note: "訂好了！" },
+                    { time: "23:00", title: "返回飯店", location: "Provence Hotel", note: "半藏門線" }
+                ]
+            },
+            {
+                date: "1/17 (五)",
+                title: "小網神社/築地/秋葉原",
+                events: [
+                    { time: "09:00", title: "出門", location: "飯店", note: "" },
+                    { time: "09:30", title: "小網神社", location: "小網神社", link: "https://www.google.com/maps/search/?api=1&query=小網神社", note: "強運除厄！" },
+                    { time: "11:00", title: "築地市場", location: "築地市場", link: "https://www.google.com/maps/search/?api=1&query=築地市場", note: "必吃玉子燒" },
+                    { time: "13:00", title: "御茶之水", location: "御茶之水", note: "日比谷線(築地->銀座) 轉 丸之內線(銀座->淡路町)" },
+                    { time: "15:30", title: "秋葉原電器街", location: "秋葉原", note: "走路約15分鐘" },
+                    { time: "17:30", title: "阿美橫丁", location: "上野", note: "京濱東北線：秋葉原->御徒町" },
+                    { time: "21:00", title: "返回飯店", location: "Provence Hotel", note: "御徒町->秋葉原->錦糸町" }
+                ]
+            },
+            {
+                date: "1/18 (六)",
+                title: "柴又老街 & 晴空塔晚餐",
+                events: [
+                    { time: "08:30", title: "出門", location: "飯店", note: "" },
+                    { time: "09:10", title: "早餐：摩斯漢堡", location: "住吉店?", note: "走路/公車" },
+                    { time: "10:00", title: "柴又帝釋天參道", location: "柴又", note: "半藏門線->京成押上線->京成金町線 (龜家本舖糰子)" },
+                    { time: "12:00", title: "午餐：川千家", location: "柴又", link: "https://www.google.com/maps/search/?api=1&query=川千家", note: "鰻魚飯" },
+                    { time: "14:30", title: "淺草寺雷門", location: "淺草", link: "https://www.google.com/maps/search/?api=1&query=淺草寺", note: "京成金町線->京成押上線->淺草線" },
+                    { time: "20:30", title: "晚餐：敘敘苑", location: "晴空塔 Solamachi 30F", link: "https://www.google.com/maps/search/?api=1&query=敘敘苑+晴空塔", note: "訂好了！絕美夜景" },
+                    { time: "23:00", title: "返回飯店", location: "Provence Hotel", note: "半藏門線：押上->錦糸町" }
+                ]
+            },
+            {
+                date: "1/19 (日)",
+                title: "原宿/澀谷/I'm donut",
+                events: [
+                    { time: "08:00", title: "出門", location: "飯店", note: "" },
+                    { time: "08:15", title: "早餐：麥當勞", location: "錦糸町站前", note: "" },
+                    { time: "09:15", title: "明治神宮", location: "原宿", note: "中央總武線：錦糸町->代代木" },
+                    { time: "10:00", title: "I'm donut", location: "原宿店", note: "粉色建築必拍！一定要買" },
+                    { time: "11:00", title: "竹下通", location: "原宿", note: "伊良可樂、逛街" },
+                    { time: "12:30", title: "午餐：AFURI", location: "原宿", note: "柚子鹽拉麵" },
+                    { time: "14:00", title: "星巴克臻選烘焙工坊", location: "中目黑", link: "https://www.google.com/maps/search/?api=1&query=Starbucks+Reserve+Roastery+Tokyo", note: "副都心線：明治神宮前->中目黑" },
+                    { time: "17:00", title: "晚餐：Shibuya Genkatsu", location: "澀谷", note: "千層炸豬排 (公車/計程車)" },
+                    { time: "19:00", title: "澀谷十字路口", location: "澀谷", note: "" },
+                    { time: "20:20", title: "SHIBUYA SKY", location: "澀谷 Scramble Square", link: "https://www.google.com/maps/search/?api=1&query=SHIBUYA+SKY", note: "預約制，夜景" },
+                    { time: "21:00", title: "東京鐵塔 (拍照)", location: "芝公園/赤羽橋", note: "埼京線->日比谷線 (時間緊湊)" },
+                    { time: "21:30", title: "返回飯店", location: "Provence Hotel", note: "半藏門線" }
+                ]
+            },
+            {
+                date: "1/20 (一)",
+                title: "川越小江戶",
+                events: [
+                    { time: "08:30", title: "出門", location: "飯店", note: "前往川越" },
+                    { time: "10:05", title: "川越冰川神社", location: "川越", link: "https://www.google.com/maps/search/?api=1&query=川越冰川神社", note: "釣鯛魚籤" },
+                    { time: "11:15", title: "時之鐘", location: "川越", note: "公車/走路" },
+                    { time: "12:00", title: "川越一番街", location: "川越", note: "午餐：林屋或小川菊鰻魚飯" },
+                    { time: "14:00", title: "大正浪漫夢通", location: "川越", note: "復古街道" },
+                    { time: "14:30", title: "熊野神社", location: "川越", note: "" },
+                    { time: "15:30", title: "喜多院", location: "川越", note: "五百羅漢" },
+                    { time: "17:30", title: "阿美橫丁", location: "上野", note: "川越->池袋->御徒町" }
+                ]
+            },
+            {
+                date: "1/21 (二)",
+                title: "上野動物園 & 東京車站",
+                events: [
+                    { time: "08:30", title: "出門", location: "飯店", note: "" },
+                    { time: "09:10", title: "早餐：摩斯漢堡", location: "住吉", note: "" },
+                    { time: "10:00", title: "上野動物園", location: "上野", link: "https://www.google.com/maps/search/?api=1&query=上野動物園", note: "熊貓、北極熊" },
+                    { time: "12:00", title: "午餐", location: "上野周邊", note: "" },
+                    { time: "14:00", title: "上野東照宮", location: "上野公園", note: "金碧輝煌" },
+                    { time: "15:00", title: "東京車站", location: "丸之內", note: "買 Dr.Martens、拍照" },
+                    { time: "20:00", title: "晴空塔", location: "押上", note: "看夜景 (丸之內線->半藏門線)" }
+                ]
+            },
+            {
+                date: "1/22 (三)",
+                title: "彈性日",
+                events: [
+                    { time: "All Day", title: "自由活動", location: "東京", note: "補貨 / 休息 / 隨意逛逛" }
+                ]
+            },
+            {
+                date: "1/23 (四)",
+                title: "返程",
+                events: [
+                    { time: "10:00", title: "退房", location: "Provence Hotel", note: "前往錦糸町站" },
+                    { time: "11:00", title: "錦糸町車站", location: "錦糸町", note: "前往機場" },
+                    { time: "12:40", title: "抵達成田機場", location: "成田機場", note: "Check-in" },
+                    { time: "15:40", title: "起飛 (JX803)", location: "成田機場", note: "飛往台北" },
+                    { time: "18:45", title: "抵達桃園", location: "TPE", note: "平安回家" }
+                ]
+            }
+        ];
+
+        let itineraryData = [];
+
+        const guideData = [
+            // FOOD
+            {
+                type: 'food',
+                title: "人形町今半 (日本橋高島屋店)",
+                subtitle: "百年歷史壽喜燒",
+                desc: "創業於明治28年(1895年)的老字號，使用頂級黑毛和牛。特色是有專人桌邊服務，將牛肉在特製割下中涮煮至完美的粉紅色，再放入打散的蛋液中，口感如雲朵般柔軟。推薦午餐的「今半膳」CP值極高。",
+                photoSpots: ["剛涮好帶粉色的牛肉與蛋液特寫", "店門口傳統日式暖簾"],
+                mapQuery: "Ningyocho Imahan Nihombashi Takashimaya"
+            },
+            {
+                type: 'food',
+                title: "敘敘苑 (晴空塔 Solamachi 店)",
+                subtitle: "高空景觀燒肉",
+                desc: "位於30樓的高空燒肉店，最著名的就是靠窗的情人雅座，可以俯瞰東京夜景。必點「壺漬牛肋條」與「牛舌」。建議日落前抵達，可以同時拍到黃昏與夜景的變化。",
+                photoSpots: ["靠窗座位與窗外東京夜景合影", "擺盤精緻的燒肉盤"],
+                mapQuery: "Jojoen Tokyo Skytree Town Solamachi"
+            },
+            {
+                type: 'food',
+                title: "I'm donut ? (原宿店)",
+                subtitle: "生甜甜圈排隊名店",
+                desc: "來自福岡的超人氣甜點，主打「生甜甜圈」(Raw Donut) 口感。麵團中加入了烤南瓜，讓口感極致濕潤Q彈，彷彿在吃生食。原宿店是粉紅色建築，二樓有內用區。必買口味：原味 (Plain)、開心果 (Pistachio)。",
+                photoSpots: ["粉紅色建築外觀", "手拿甜甜圈與招牌Logo合照"],
+                mapQuery: "I'm donut? Harajuku"
+            },
+            {
+                type: 'food',
+                title: "AFURI (阿夫利)",
+                subtitle: "清爽系柚子鹽拉麵",
+                desc: "發源於神奈川縣阿夫利山，使用天然山泉水熬製的金黃色雞湯，加入清新的「柚子原汁」，打破了拉麵油膩的印象。麵條使用全麥細麵，口感彈牙帶麥香。店內裝潢現代時尚，非常受女性歡迎。",
+                photoSpots: ["清澈金黃湯頭的俯拍特寫", "炙燒叉燒的側面"],
+                mapQuery: "AFURI Harajuku"
+            },
+            {
+                type: 'food',
+                title: "Shibuya Genkatsu (渋谷げんかつ)",
+                subtitle: "千層炸豬排始祖",
+                desc: "與一般的炸豬排不同，這裡是將超薄切的豬肉片層層堆疊約25層後油炸。口感外酥內嫩，肉汁豐富且易於咀嚼。推薦「黑胡椒」或「起司」口味。",
+                photoSpots: ["千層豬排斷面秀"],
+                mapQuery: "Kimukatsu Shibuya"
+            },
+            
+            // SPOTS
+            {
+                type: 'spot',
+                title: "東京車站 (丸之內側)",
+                subtitle: "文藝復興式紅磚建築",
+                desc: "由辰野金吾設計，經過修復後重現百年前風華。南、北圓頂內的浮雕有十二生肖中的八種動物（另外四種在佐賀武雄溫泉）。",
+                photoSpots: ["KITTE大樓 6F 空中花園 (拍攝車站側面全景最佳)", "丸之內大樓 5F 露台 (拍攝車站正面)", "圓頂內部八角形天花板"],
+                mapQuery: "Tokyo Station Marunouchi"
+            },
+            {
+                type: 'spot',
+                title: "川越冰川神社",
+                subtitle: "釣鯛魚籤求良緣",
+                desc: "1500年歷史的結緣名所。這裡最特別的是「御神籤」不是用抽的，而是用釣竿「釣」的！紅色鯛魚代表「一年安泰」，粉色鯛魚代表「良緣祈願」。夏季有著名的風鈴祭。",
+                photoSpots: ["手持釣竿釣起鯛魚籤的瞬間", "繪馬隧道"],
+                mapQuery: "Kawagoe Hikawa Shrine"
+            },
+            {
+                type: 'spot',
+                title: "時之鐘 (川越)",
+                subtitle: "小江戶的聽覺象徵",
+                desc: "木造鐘樓，每天 6:00, 12:00, 15:00, 18:00 會敲鐘報時。建議在鐘樓下的「星巴克川越時鐘小路店」稍作休息，該店有庭園設計，非常有氣氛。",
+                photoSpots: ["由下往上仰拍鐘樓", "站在鐘樓下街道的回眸照"],
+                mapQuery: "Toki no Kane Kawagoe"
+            },
+            {
+                type: 'spot',
+                title: "小網神社",
+                subtitle: "東京最強強運厄除",
+                desc: "雖然腹地很小，但香火極旺。以「強運厄除」與「洗錢弁財天」聞名。二戰時帶著這裡御守的士兵全員生還。記得在「洗錢井」用竹簍洗一下硬幣放回錢包提升財運。",
+                photoSpots: ["神社正面的木造龍雕刻 (強運厄除之龍)", "洗錢井"],
+                mapQuery: "Koami Shrine"
+            },
+            {
+                type: 'spot',
+                title: "Shibuya Sky",
+                subtitle: "東京最紅高空景觀",
+                desc: "位於 Scramble Square 頂樓，360度露天展望台。最熱門的是角落的玻璃角 (Sky Edge)。建議預約日落前一小時入場，可以看夕陽與百萬夜景。",
+                photoSpots: ["Sky Edge 角落 (需排隊)", "手扶梯向下時的背景視角"],
+                mapQuery: "Shibuya Sky"
+            },
+             {
+                type: 'spot',
+                title: "柴又帝釋天 & 參道",
+                subtitle: "昭和懷舊電影場景",
+                desc: "電影《男人真命苦》的舞台，保留了濃濃的昭和下町風情。參道上有許多老舖，必吃「草糰子」和「仙貝」。",
+                photoSpots: ["柴又車站前的寅次郎銅像", "帝釋天題經寺的木雕畫廊"],
+                mapQuery: "Shibamata Taishakuten"
+            }
+        ];
+
+        const defaultTodos = [
+            { text: "護照", checked: false },
+            { text: "日幣現金", checked: false },
+            { text: "網卡/漫遊設定", checked: false },
+            { text: "行動電源", checked: false },
+            { text: "個人藥品", checked: false },
+            { text: "Visit Japan Web 填寫", checked: false }
+        ];
+
+        const defaultShopping = [
+            { text: "感冒藥", checked: false },
+            { text: "吹風機", checked: false },
+            { text: "Uniqlo發熱衣", checked: false }
+        ];
+
+        // ================= APP LOGIC =================
+
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initItinerary();
+            renderPlanTabs();
+            renderGuide();
+            loadWallet();
+            loadLists();
+            
+            // Default View
+            switchTab('plan');
+            selectDay(0);
+        });
+
+        function initItinerary() {
+            const saved = localStorage.getItem('trip_itinerary');
+            if (saved) {
+                itineraryData = JSON.parse(saved);
+            } else {
+                itineraryData = JSON.parse(JSON.stringify(defaultItineraryData));
+            }
+        }
+
+        // --- Navigation ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            
+            // Support for the new split views
+            const target = document.getElementById(`view-${tabId}`);
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('fade-in');
+            }
+            
+            // Update active state in nav
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-muji-accent', 'font-bold');
+                btn.classList.add('text-muji-sub');
+            });
+            const activeBtn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
+            if(activeBtn) {
+                activeBtn.classList.add('text-muji-accent', 'font-bold');
+                activeBtn.classList.remove('text-muji-sub');
+            }
+        }
+
+        // --- PLAN Module ---
+        function renderPlanTabs() {
+            const container = document.getElementById('day-tabs');
+            container.innerHTML = itineraryData.map((day, index) => `
+                <button onclick="selectDay(${index})" 
+                    class="day-tab whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition
+                    bg-white border border-stone-200 text-stone-500 shadow-sm flex-shrink-0" id="day-btn-${index}">
+                    ${day.date.split(' ')[0]}
+                </button>
+            `).join('');
+        }
+
+        function selectDay(index) {
+            // Update Tab Styles
+            document.querySelectorAll('.day-tab').forEach(btn => {
+                btn.classList.remove('bg-muji-accent', 'text-white', 'border-transparent');
+                btn.classList.add('bg-white', 'text-stone-500', 'border-stone-200');
+            });
+            const activeBtn = document.getElementById(`day-btn-${index}`);
+            if(activeBtn) {
+                activeBtn.classList.remove('bg-white', 'text-stone-500', 'border-stone-200');
+                activeBtn.classList.add('bg-muji-accent', 'text-white', 'border-transparent');
+            }
+
+            // Render Content
+            const day = itineraryData[index];
+            const content = document.getElementById('itinerary-content');
+            
+            let eventsHtml = day.events.map((event, evtIdx) => {
+                const importantClass = event.important ? 'border-l-4 border-muji-highlight bg-red-50' : 'border-l-4 border-muji-accent bg-white';
+                // Note: Added onclick to open edit modal, and stopPropagation on link
+                const linkBtn = event.link ? `<a href="${event.link}" target="_blank" onclick="event.stopPropagation()" class="text-xs bg-stone-100 px-2 py-1 rounded text-stone-600 hover:bg-stone-200 ml-2"><i class="fa-solid fa-map-location-dot"></i> 地圖</a>` : '';
+                
+                return `
+                    <div onclick="openEditEventModal(${index}, ${evtIdx})" class="event-card ${importantClass} p-3 rounded-r-lg shadow-sm flex gap-3 items-start cursor-pointer">
+                        <div class="font-mono text-lg font-bold text-stone-400 w-14 flex-shrink-0 leading-none pt-1">${event.time}</div>
+                        <div class="flex-grow">
+                            <div class="font-bold text-stone-800 text-base flex items-center flex-wrap">
+                                ${event.title}
+                                ${linkBtn}
+                            </div>
+                            <div class="text-xs text-stone-500 mt-1"><i class="fa-solid fa-location-dot mr-1"></i>${event.location}</div>
+                            ${event.note ? `<div class="text-xs text-stone-400 mt-1 bg-stone-50 inline-block px-2 py-1 rounded">${event.note}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            content.innerHTML = `
+                <h2 class="text-xl font-bold text-center text-muji-accent mb-2 sticky top-0 bg-muji-bg py-2 z-20 shadow-sm">${day.title}</h2>
+                ${eventsHtml}
+                <div class="text-center text-xs text-stone-300 py-4">End of Day</div>
+            `;
+        }
+
+        // --- Event CRUD Logic ---
+        function openAddEventModal() {
+            resetModal();
+            document.getElementById('modal-title').innerText = "新增行程";
+            
+            // Populate Day Selector
+            const select = document.getElementById('new-evt-day');
+            select.innerHTML = itineraryData.map((day, idx) => 
+                `<option value="${idx}">${day.date} - ${day.title}</option>`
+            ).join('');
+            
+            // Default to current active day
+            const currentActiveDay = document.querySelector('.day-tab.bg-muji-accent');
+            if(currentActiveDay) {
+                select.value = parseInt(currentActiveDay.id.replace('day-btn-', ''));
+            }
+
+            document.getElementById('event-modal').classList.remove('hidden');
+        }
+
+        function openEditEventModal(dayIdx, eventIdx) {
+            resetModal();
+            document.getElementById('modal-title').innerText = "修改行程";
+            
+            // Set hidden indices
+            document.getElementById('edit-day-idx').value = dayIdx;
+            document.getElementById('edit-event-idx').value = eventIdx;
+
+            // Show Delete Button
+            document.getElementById('btn-delete-event').classList.remove('hidden');
+
+            const eventData = itineraryData[dayIdx].events[eventIdx];
+
+            // Populate Day Selector (and disable it for simplicity in edit mode, or allow moving)
+            const select = document.getElementById('new-evt-day');
+            select.innerHTML = itineraryData.map((day, idx) => 
+                `<option value="${idx}">${day.date} - ${day.title}</option>`
+            ).join('');
+            select.value = dayIdx;
+
+            // Fill Data
+            document.getElementById('new-evt-time').value = eventData.time;
+            document.getElementById('new-evt-title').value = eventData.title;
+            document.getElementById('new-evt-loc').value = eventData.location;
+            document.getElementById('new-evt-note').value = eventData.note;
+
+            document.getElementById('event-modal').classList.remove('hidden');
+        }
+
+        function resetModal() {
+            document.getElementById('edit-day-idx').value = "";
+            document.getElementById('edit-event-idx').value = "";
+            document.getElementById('new-evt-title').value = "";
+            document.getElementById('new-evt-time').value = "";
+            document.getElementById('new-evt-loc').value = "";
+            document.getElementById('new-evt-note').value = "";
+            document.getElementById('btn-delete-event').classList.add('hidden');
+        }
+
+        function handleSaveEvent() {
+            const dayIdx = parseInt(document.getElementById('new-evt-day').value);
+            const time = document.getElementById('new-evt-time').value;
+            const title = document.getElementById('new-evt-title').value.trim();
+            const loc = document.getElementById('new-evt-loc').value.trim();
+            const note = document.getElementById('new-evt-note').value.trim();
+            
+            // Check for edit mode
+            const editDayStr = document.getElementById('edit-day-idx').value;
+            const editEvtStr = document.getElementById('edit-event-idx').value;
+            const isEditMode = editDayStr !== "" && editEvtStr !== "";
+
+            if (!time || !title) {
+                alert('請填寫時間與標題');
+                return;
+            }
+
+            const newEventData = {
+                time: time,
+                title: title,
+                location: loc || '',
+                note: note || '',
+                important: false // Preserve important status if real complex logic, here default false
+            };
+            
+            // If Edit Mode, preserve 'link' and 'important' from original if exists
+            if (isEditMode) {
+                const oldEvent = itineraryData[parseInt(editDayStr)].events[parseInt(editEvtStr)];
+                newEventData.link = oldEvent.link;
+                newEventData.important = oldEvent.important;
+                
+                // If day changed, remove from old day
+                if (parseInt(editDayStr) !== dayIdx) {
+                    itineraryData[parseInt(editDayStr)].events.splice(parseInt(editEvtStr), 1);
+                    itineraryData[dayIdx].events.push(newEventData);
+                } else {
+                    // Same day update
+                    itineraryData[dayIdx].events[parseInt(editEvtStr)] = newEventData;
+                }
+            } else {
+                // Add New
+                itineraryData[dayIdx].events.push(newEventData);
+            }
+
+            // Sort Events by Time
+            itineraryData[dayIdx].events.sort((a, b) => {
+                if (a.time === "All Day") return -1;
+                if (b.time === "All Day") return 1;
+                return a.time.localeCompare(b.time);
+            });
+
+            // Save & Close
+            localStorage.setItem('trip_itinerary', JSON.stringify(itineraryData));
+            document.getElementById('event-modal').classList.add('hidden');
+            selectDay(dayIdx); // Refresh view
+        }
+
+        function deleteCurrentEvent() {
+            if(!confirm("確定要刪除此行程嗎？")) return;
+
+            const dayIdx = parseInt(document.getElementById('edit-day-idx').value);
+            const evtIdx = parseInt(document.getElementById('edit-event-idx').value);
+
+            itineraryData[dayIdx].events.splice(evtIdx, 1);
+            localStorage.setItem('trip_itinerary', JSON.stringify(itineraryData));
+            document.getElementById('event-modal').classList.add('hidden');
+            selectDay(dayIdx);
+        }
+
+
+        // --- GUIDE Module ---
+        function filterGuide(type) {
+            document.querySelectorAll('.guide-filter').forEach(btn => {
+                btn.classList.remove('bg-muji-accent', 'text-white');
+                btn.classList.add('bg-white', 'text-stone-500');
+            });
+            
+            const activeBtn = document.querySelector(`button[onclick="filterGuide('${type}')"]`);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-muji-accent', 'text-white');
+                activeBtn.classList.remove('bg-white', 'text-stone-500');
+            }
+            renderGuide(type);
+        }
+
+        function renderGuide(filterType = 'all') {
+            const container = document.getElementById('guide-list');
+            
+            const filteredData = filterType === 'all' 
+                ? guideData 
+                : guideData.filter(item => item.type === filterType);
+
+            container.innerHTML = filteredData.map(item => {
+                const typeLabel = item.type === 'food' 
+                    ? '<span class="bg-orange-100 text-orange-600 text-[10px] px-2 py-1 rounded-full mb-2 inline-block">美食</span>' 
+                    : '<span class="bg-muji-blue/20 text-muji-blue text-[10px] px-2 py-1 rounded-full mb-2 inline-block">景點</span>';
+
+                const photoSpotsHtml = item.photoSpots 
+                    ? `<div class="mt-3 pt-3 border-t border-dashed border-stone-200">
+                        <div class="text-xs font-bold text-stone-500 mb-1"><i class="fa-solid fa-camera mr-1"></i>推薦拍照點：</div>
+                        <div class="flex flex-wrap">
+                            ${item.photoSpots.map(spot => `<span class="photo-spot-tag">${spot}</span>`).join('')}
+                        </div>
+                       </div>` 
+                    : '';
+
+                return `
+                <div class="bg-white rounded-lg overflow-hidden shadow-sm border border-stone-100">
+                    <div class="p-4">
+                        ${typeLabel}
+                        <h3 class="text-lg font-bold text-stone-800 flex justify-between items-start">
+                            ${item.title}
+                        </h3>
+                        <p class="text-xs text-muji-accent font-bold mb-2">${item.subtitle}</p>
+                        <p class="text-sm text-stone-600 leading-relaxed text-justify mb-2">
+                            ${item.desc}
+                        </p>
+                        ${photoSpotsHtml}
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.mapQuery)}" target="_blank" class="block text-center w-full py-2 mt-3 border border-stone-300 rounded text-sm text-stone-600 hover:bg-stone-50 transition">
+                            在 Google Maps 查看
+                        </a>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        // --- WALLET Module ---
+        let expenses = JSON.parse(localStorage.getItem('trip_expenses')) || [];
+        
+        function calculateRate() {
+            const rate = parseFloat(document.getElementById('rate-input').value) || 0.215;
+            const inputStr = document.getElementById('calc-input').value;
+            
+            try {
+                const safeInput = inputStr.replace(/[^0-9+\-*/().]/g, '');
+                if (!safeInput) return;
+                
+                const jpy = Function('"use strict";return (' + safeInput + ')')();
+                const twd = Math.round(jpy * rate);
+                
+                document.getElementById('calc-result').innerText = twd.toLocaleString();
+            } catch (e) {
+                alert('算式錯誤');
+            }
+        }
+
+        async function addExpense() {
+            const item = document.getElementById('expense-item').value;
+            const amount = parseFloat(document.getElementById('expense-amount').value);
+            const fileInput = document.getElementById('expense-photo');
+            
+            if(!item || !amount) {
+                alert('請輸入項目與金額');
+                return;
+            }
+
+            let photoData = null;
+            if (fileInput.files && fileInput.files[0]) {
+                try {
+                    document.getElementById('photo-label').innerHTML = '<div class="loader"></div>';
+                    photoData = await compressImage(fileInput.files[0]);
+                } catch (e) {
+                    alert('圖片處理失敗');
+                    console.error(e);
+                } finally {
+                    document.getElementById('photo-label').innerHTML = '相片(選填)';
+                }
+            }
+
+            const newExpense = {
+                id: Date.now(),
+                item,
+                amount,
+                photo: photoData,
+                date: new Date().toLocaleString()
+            };
+
+            try {
+                expenses.unshift(newExpense);
+                localStorage.setItem('trip_expenses', JSON.stringify(expenses));
+                renderExpenses();
+                
+                document.getElementById('expense-item').value = '';
+                document.getElementById('expense-amount').value = '';
+                document.getElementById('expense-photo').value = '';
+            } catch (e) {
+                if(e.name === 'QuotaExceededError') {
+                    alert('儲存空間已滿！請清除部分資料或不要上傳照片。');
+                    expenses.shift(); 
+                }
+            }
+        }
+
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        const MAX_WIDTH = 600;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        resolve(canvas.toDataURL('image/jpeg', 0.6));
+                    };
+                    img.onerror = error => reject(error);
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function renderExpenses() {
+            const list = document.getElementById('expense-list');
+            const rate = parseFloat(document.getElementById('rate-input').value) || 0.215;
+            let totalJ = 0;
+
+            list.innerHTML = expenses.map(ex => {
+                totalJ += ex.amount;
+                return `
+                <div class="bg-white p-3 rounded flex justify-between items-center shadow-sm relative group">
+                    <div class="flex items-center gap-3">
+                        ${ex.photo ? `<img src="${ex.photo}" class="w-10 h-10 object-cover rounded cursor-pointer" onclick="showModal('${ex.photo}')">` : '<div class="w-10 h-10 bg-stone-100 rounded flex items-center justify-center text-stone-300"><i class="fa-solid fa-receipt"></i></div>'}
+                        <div>
+                            <div class="font-bold text-stone-700 text-sm">${ex.item}</div>
+                            <div class="text-[10px] text-stone-400">${ex.date.split(' ')[0]}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-stone-800">¥${ex.amount.toLocaleString()}</div>
+                        <div class="text-xs text-stone-400">≈ NT$${Math.round(ex.amount * rate).toLocaleString()}</div>
+                    </div>
+                    <button onclick="deleteExpense(${ex.id})" class="absolute right-0 top-0 bg-red-500 text-white w-6 h-6 rounded-bl text-xs hidden group-hover:block">×</button>
+                </div>
+                `;
+            }).join('');
+
+            document.getElementById('total-jpy').innerText = totalJ.toLocaleString();
+            document.getElementById('total-twd').innerText = Math.round(totalJ * rate).toLocaleString();
+        }
+
+        function deleteExpense(id) {
+            if(confirm('確定刪除?')) {
+                expenses = expenses.filter(e => e.id !== id);
+                localStorage.setItem('trip_expenses', JSON.stringify(expenses));
+                renderExpenses();
+            }
+        }
+        
+        function clearExpenses() {
+            if(confirm('確定清除所有記帳紀錄？此操作無法復原。')) {
+                expenses = [];
+                localStorage.removeItem('trip_expenses');
+                renderExpenses();
+            }
+        }
+
+        function loadWallet() {
+            renderExpenses();
+        }
+        
+        function showModal(src) {
+            document.getElementById('modal-img').src = src;
+            document.getElementById('image-modal').classList.remove('hidden');
+        }
+
+        // --- LISTS Module ---
+        function loadLists() {
+            // Checklist (Packing)
+            const savedTodos = JSON.parse(localStorage.getItem('trip_todos'));
+            const todos = savedTodos || defaultTodos;
+            renderTodos(todos);
+
+            // Shopping List (New Feature)
+            const savedShopping = JSON.parse(localStorage.getItem('trip_shopping'));
+            const shopping = savedShopping || defaultShopping;
+            renderShopping(shopping);
+
+            // Memo (Packing)
+            const memo = localStorage.getItem('trip_memo') || '';
+            const textarea = document.getElementById('memo-area');
+            textarea.value = memo;
+            renderMemoLinks(memo, 'memo-links');
+            
+            textarea.addEventListener('input', (e) => {
+                localStorage.setItem('trip_memo', e.target.value);
+                renderMemoLinks(e.target.value, 'memo-links');
+            });
+
+            // Memo (Shopping) - NEW
+            const shopMemo = localStorage.getItem('trip_shopping_memo') || '';
+            const shopTextarea = document.getElementById('shopping-memo-area');
+            shopTextarea.value = shopMemo;
+            renderMemoLinks(shopMemo, 'shopping-memo-links');
+
+            shopTextarea.addEventListener('input', (e) => {
+                localStorage.setItem('trip_shopping_memo', e.target.value);
+                renderMemoLinks(e.target.value, 'shopping-memo-links');
+            });
+        }
+
+        // --- Packing List Logic ---
+        function renderTodos(todos) {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = todos.map((todo, idx) => `
+                <label class="flex items-center gap-3 bg-white p-3 rounded shadow-sm cursor-pointer select-none">
+                    <input type="checkbox" ${todo.checked ? 'checked' : ''} onchange="toggleTodo(${idx})" class="w-5 h-5 text-muji-accent rounded border-gray-300 focus:ring-muji-accent">
+                    <span class="text-sm text-stone-700 transition ${todo.checked ? 'line-through text-stone-300' : ''}">${todo.text}</span>
+                    <button onclick="deleteTodo(${idx})" class="ml-auto text-stone-300 hover:text-red-400"><i class="fa-solid fa-trash-can"></i></button>
+                </label>
+            `).join('');
+            
+            localStorage.setItem('trip_todos', JSON.stringify(todos));
+        }
+
+        function toggleTodo(index) {
+            const todos = JSON.parse(localStorage.getItem('trip_todos'));
+            todos[index].checked = !todos[index].checked;
+            renderTodos(todos);
+        }
+
+        function deleteTodo(index) {
+            const todos = JSON.parse(localStorage.getItem('trip_todos'));
+            todos.splice(index, 1);
+            renderTodos(todos);
+        }
+
+        function addTodo() {
+            const input = document.getElementById('new-todo');
+            const text = input.value.trim();
+            if(text) {
+                const todos = JSON.parse(localStorage.getItem('trip_todos')) || [];
+                todos.push({ text, checked: false });
+                renderTodos(todos);
+                input.value = '';
+            }
+        }
+
+        // --- Shopping List Logic (New Feature) ---
+        function renderShopping(items) {
+            const container = document.getElementById('shopping-list-container');
+            container.innerHTML = items.map((item, idx) => `
+                <label class="flex items-center gap-3 bg-white p-3 rounded shadow-sm cursor-pointer select-none group border-l-2 ${item.checked ? 'border-stone-200' : 'border-muji-accent'}">
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShopItem(${idx})" class="w-5 h-5 text-muji-accent rounded border-gray-300 focus:ring-muji-accent">
+                    <span class="text-sm font-medium text-stone-700 transition flex-grow ${item.checked ? 'line-through text-stone-300' : ''}">${item.text}</span>
+                    <button onclick="deleteShopItem(${idx})" class="text-stone-300 hover:text-red-400 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                </label>
+            `).join('');
+            
+            localStorage.setItem('trip_shopping', JSON.stringify(items));
+        }
+
+        function toggleShopItem(index) {
+            const items = JSON.parse(localStorage.getItem('trip_shopping'));
+            items[index].checked = !items[index].checked;
+            renderShopping(items);
+        }
+
+        function deleteShopItem(index) {
+            const items = JSON.parse(localStorage.getItem('trip_shopping'));
+            items.splice(index, 1);
+            renderShopping(items);
+        }
+
+        function addShopItem() {
+            const input = document.getElementById('new-shop-item');
+            const text = input.value.trim();
+            if(text) {
+                const items = JSON.parse(localStorage.getItem('trip_shopping')) || [];
+                items.push({ text, checked: false });
+                renderShopping(items);
+                input.value = '';
+            }
+        }
+
+
+        function renderMemoLinks(text, containerId) {
+            const container = document.getElementById(containerId);
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            const matches = text.match(urlRegex);
+            
+            if(matches) {
+                container.innerHTML = matches.map(url => `
+                    <a href="${url}" target="_blank" class="bg-stone-200 px-3 py-1 rounded-full text-xs text-stone-600 truncate max-w-[150px] block hover:bg-stone-300">
+                        <i class="fa-solid fa-link mr-1"></i>${new URL(url).hostname}
+                    </a>
+                `).join('');
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+    </script>
+</body>
+</html>
